@@ -1,8 +1,10 @@
 #	Wheel widget for Android #
 
+Forked from sephiroth74/AndroidWheel
+
 To include the wheel widget in the current layout, you should add in the layout xml this lines:
 
-            <it.sephiroth.android.wheel.view.Wheel
+            <it.sephiroth.android.wheel.Wheel
                 android:id="@+id/wheel"
                 xmlns:sephiroth="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
@@ -11,6 +13,14 @@ To include the wheel widget in the current layout, you should add in the layout 
                 sephiroth:ticks="28" />
 				
 Where **numRotations** is the max number of rotations the wheel can perform and **ticks** is the total number of ticks the wheel will display.
+
+###attributes added
+
+**ShowIndicator**
+
+**Bidirection**
+
+**FlingEnabled**
 
 In your activity you can add a **OnScrollListener** listener to the wheel widget, in this way:
 
@@ -29,6 +39,8 @@ In your activity you can add a **OnScrollListener** listener to the wheel widget
 			public void onScroll( Wheel view, float value, int roundValue ) {
 			}
 		} );
+
+**bug fixed** Can't scrolling when OnScrollListener is null. 
 		
 Where **float value** is a value between -1.0 and 1.0 of the current indicator position and **int roundValue** is a value between -(ticks*numRotations) and (ticks*numRotations)
 

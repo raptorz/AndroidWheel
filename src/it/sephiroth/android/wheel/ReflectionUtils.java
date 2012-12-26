@@ -1,4 +1,4 @@
-package it.sephiroth.android.wheel.utils;
+package it.sephiroth.android.wheel;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package it.sephiroth.android.wheel.view;
+package it.sephiroth.android.wheel;
 
 import android.annotation.TargetApi;
 import android.view.View;

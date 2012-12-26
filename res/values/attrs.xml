@@ -3,6 +3,9 @@
     <declare-styleable name="Wheel">
         <attr format="integer" name="ticks" />
         <attr format="integer" name="numRotations" />
+        <attr format="boolean" name="showIndicator" />
+        <attr format="boolean" name="bidirection" />
+        <attr format="boolean" name="flingEnabled" />
     </declare-styleable>
     
     <declare-styleable name="WheelRadio">

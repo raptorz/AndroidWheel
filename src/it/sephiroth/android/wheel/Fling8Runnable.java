@@ -1,5 +1,6 @@
-package it.sephiroth.android.wheel.view;
+package it.sephiroth.android.wheel;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
@@ -13,6 +14,7 @@ class Fling8Runnable extends IFlingRunnable {
 		mScroller = new Scroller( ( (View) parent ).getContext(), new DecelerateInterpolator() );
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public float getCurrVelocity() {
 		return mScroller.getCurrVelocity();

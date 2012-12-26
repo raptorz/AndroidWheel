@@ -1,4 +1,4 @@
-package it.sephiroth.android.wheel.easing;
+package it.sephiroth.android.wheel;
 
 public interface Easing {
 

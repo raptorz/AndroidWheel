@@ -1,12 +1,8 @@
-package it.sephiroth.android.wheel.view;
+package it.sephiroth.android.wheel;
 
 import it.sephiroth.android.wheel.R;
-import it.sephiroth.android.wheel.easing.Easing;
-import it.sephiroth.android.wheel.easing.Sine;
-import it.sephiroth.android.wheel.graphics.LinearGradientDrawable;
-import it.sephiroth.android.wheel.utils.ReflectionUtils;
-import it.sephiroth.android.wheel.utils.ReflectionUtils.ReflectionException;
-import it.sephiroth.android.wheel.view.IFlingRunnable.FlingRunnableView;
+import it.sephiroth.android.wheel.IFlingRunnable.FlingRunnableView;
+import it.sephiroth.android.wheel.ReflectionUtils.ReflectionException;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -33,6 +29,30 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 public class Wheel extends View implements OnGestureListener, FlingRunnableView, VibrationWidget {
+
+	public boolean isFlingEnabled() {
+		return mFlingEnabled;
+	}
+
+	public void setFlingEnabled(boolean flingEnabled) {
+		this.mFlingEnabled = flingEnabled;
+	}
+
+	public boolean isBidirection() {
+		return mBidirection;
+	}
+
+	public void setBidirection(boolean bidirection) {
+		this.mBidirection = bidirection;
+	}
+
+	public boolean isShowIndicator() {
+		return mShowIndicator;
+	}
+
+	public void setShowIndicator(boolean showIndicator) {
+		this.mShowIndicator = showIndicator;
+	}
 
 	/** The Constant LOG_TAG. */
 	static final String LOG_TAG = "wheel";
@@ -125,6 +145,10 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	private int[] mBgColors = { 0xffa1a1a1, 0xffa1a1a1, 0xffffffff, 0xffa1a1a1, 0xffa1a1a1 };
 	private float[] mBgPositions = { 0, 0.2f, 0.5f, 0.8f, 1f };
 
+	boolean mShowIndicator = true;
+	boolean mBidirection   = true;
+	boolean mFlingEnabled  = true;
+	int mTickValue = 0;
 
 	/**
 	 * Instantiates a new wheel.
@@ -205,6 +229,7 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	 * @param defStyle
 	 *           the def style
 	 */
+	@SuppressWarnings("deprecation")
 	private void init( Context context, AttributeSet attrs, int defStyle ) {
 
 		if ( android.os.Build.VERSION.SDK_INT > 8 ) {
@@ -222,6 +247,9 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 
 		mTicksCount = a.getInteger( R.styleable.Wheel_ticks, 18 );
 		mWheelSizeFactor = a.getInteger( R.styleable.Wheel_numRotations, 2 );
+		mShowIndicator = a.getBoolean(R.styleable.Wheel_showIndicator, true);
+		mBidirection = a.getBoolean(R.styleable.Wheel_bidirection, true);
+		mFlingEnabled = a.getBoolean(R.styleable.Wheel_flingEnabled, true);
 
 		a.recycle();
 
@@ -393,6 +421,13 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 		super.onDraw( canvas );
 
 		if ( mShader3 != null ) {
+			int value = mTickValue;
+			if (mWidth > 0 && getTickValue() != value) {
+				mOriginalDeltaX = (int)((float)value / mTicksCount * mWidth 
+						* this.mWheelSizeFactor);
+				getTickValue();
+			}
+
 			canvas.setDrawFilter( mDF );
 
 			final int w = mWidth;
@@ -420,23 +455,25 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 				canvas.drawBitmap( mTickBitmap, mDrawMatrix, mPaint );
 			}
 
-			float indicatorx = ( mIndicatorX + mOriginalDeltaX );
-
-			if ( indicatorx < 0 ) {
-				indicatorx = ( mWidth * 2 ) - ( -indicatorx % ( mWidth * 2 ) );
-			} else {
-				indicatorx = indicatorx % ( mWidth * 2 );
-			}
-
-			if ( indicatorx > 0 && indicatorx < mWidth ) {
-
-				x2 = (float) mTicksEasing.easeInOut( indicatorx, 0, mWidth, w );
-				scale2 = (float) ( Math.sin( Math.PI * ( indicatorx / mWidth ) ) );
-
-				mDrawMatrix.reset();
-				mDrawMatrix.setScale( scale2, 1 );
-				mDrawMatrix.postTranslate( x2 - ( mTicksSize / 2 ), 0 );
-				canvas.drawBitmap( mIndicator, mDrawMatrix, mPaint );
+			if (mShowIndicator) {
+				float indicatorx = ( mIndicatorX + mOriginalDeltaX );
+	
+				if ( indicatorx < 0 ) {
+					indicatorx = ( mWidth * 2 ) - ( -indicatorx % ( mWidth * 2 ) );
+				} else {
+					indicatorx = indicatorx % ( mWidth * 2 );
+				}
+	
+				if ( indicatorx > 0 && indicatorx < mWidth ) {
+	
+					x2 = (float) mTicksEasing.easeInOut( indicatorx, 0, mWidth, w );
+					scale2 = (float) ( Math.sin( Math.PI * ( indicatorx / mWidth ) ) );
+	
+					mDrawMatrix.reset();
+					mDrawMatrix.setScale( scale2, 1 );
+					mDrawMatrix.postTranslate( x2 - ( mTicksSize / 2 ), 0 );
+					canvas.drawBitmap( mIndicator, mDrawMatrix, mPaint );
+				}
 			}
 
 			mPaint.setShader( mShader3 );
@@ -450,6 +487,7 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	 * @param colors
 	 * @param positions
 	 */
+	@SuppressWarnings("deprecation")
 	public void setBackgroundColors( int[] colors, float[] positions ) {
 		if ( colors != null && positions != null && colors.length == positions.length ) {
 			mBgColors = colors;
@@ -513,7 +551,12 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 			mTickBitmap = makeTickerBitmap( (int) Math.ceil( mTicksSize ), bottom - top );
 			mShader3 = new BitmapShader( makeBitmap3( right - left, bottom - top ), Shader.TileMode.CLAMP, Shader.TileMode.REPEAT );
 
-			mMinX = -mMaxX;
+			if (this.mBidirection) {
+				mMinX = -mMaxX;
+			}
+			else {
+				mMinX = 0;
+			}
 
 			if ( null != mLayoutListener ) {
 				mLayoutListener.onLayout( this );
@@ -604,11 +647,21 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 
 		if ( !mToLeft ) {
 			if ( mOriginalDeltaX + delta > mMaxX ) {
-				delta /= ( ( (float) mOriginalDeltaX + delta ) - mMaxX ) / 10;
+				if (this.mFlingEnabled) {
+					delta /= ( ( (float) mOriginalDeltaX + delta ) - mMaxX ) / 10;
+				}
+				else {
+					delta = mMaxX - mOriginalDeltaX;
+				}
 			}
 		} else {
 			if ( mOriginalDeltaX + delta < mMinX ) {
-				delta /= -( ( (float) mOriginalDeltaX + delta ) - mMinX ) / 10;
+				if (this.mFlingEnabled) {
+					delta /= -( ( (float) mOriginalDeltaX + delta ) - mMinX ) / 10;
+				}
+				else {
+					delta = mMinX - mOriginalDeltaX;
+				}
 			}
 		}
 
@@ -765,7 +818,7 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	 * Scroll completed.
 	 */
 	void scrollCompleted() {
-		if ( mScrollListener != null ) {
+		//if ( mScrollListener != null ) {
 			if ( mInLayout ) {
 				if ( mScrollSelectionNotifier == null ) {
 					mScrollSelectionNotifier = new ScrollSelectionNotifier();
@@ -774,14 +827,14 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 			} else {
 				fireOnScrollCompleted();
 			}
-		}
+		//}
 	}
 
 	/**
 	 * Scroll started.
 	 */
 	void scrollStarted() {
-		if ( mScrollListener != null ) {
+		//if ( mScrollListener != null ) {
 			if ( mInLayout ) {
 				if ( mScrollSelectionNotifier == null ) {
 					mScrollSelectionNotifier = new ScrollSelectionNotifier();
@@ -790,14 +843,14 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 			} else {
 				fireOnScrollStarted();
 			}
-		}
+		//}
 	}
 
 	/**
 	 * Scroll running.
 	 */
 	void scrollRunning() {
-		if ( mScrollListener != null ) {
+		//if ( mScrollListener != null ) {
 			if ( mInLayout ) {
 				if ( mScrollSelectionNotifier == null ) {
 					mScrollSelectionNotifier = new ScrollSelectionNotifier();
@@ -806,7 +859,7 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 			} else {
 				fireOnScrollRunning();
 			}
-		}
+		//}
 	}
 
 	/**
@@ -827,7 +880,8 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	 * @return the tick value
 	 */
 	int getTickValue() {
-		return (int) ( ( getCurrentPage() * mTicksCount ) + ( mOriginalDeltaX % mWidth ) / mTickSpace );
+		mTickValue = (int) ( ( getCurrentPage() * mTicksCount ) + ( mOriginalDeltaX % mWidth ) / mTickSpace );
+		return mTickValue;
 	}
 
 	/**
@@ -865,14 +919,18 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	 * Fire on scroll completed.
 	 */
 	private void fireOnScrollCompleted() {
-		mScrollListener.onScrollFinished( this, getValue(), getTickValue() );
+		if (null != mScrollListener) {
+			mScrollListener.onScrollFinished( this, getValue(), getTickValue() );
+		}
 	}
 
 	/**
 	 * Fire on scroll started.
 	 */
 	private void fireOnScrollStarted() {
-		mScrollListener.onScrollStarted( this, getValue(), getTickValue() );
+		if (null != mScrollListener) {
+			mScrollListener.onScrollStarted( this, getValue(), getTickValue() );
+		}
 	}
 
 	/**
@@ -902,5 +960,49 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	@Override
 	public int getMaxX() {
 		return mMaxX;
+	}
+	
+
+	public void setTicks(int i) {
+		this.mTicksCount = i;
+	}
+
+	public void setTickValue(int value, boolean fireScrollEvent) {
+		if ((mBidirection && value >= -this.mTicksCount || value >= 0)
+				&& value <= this.mTicksCount) {
+			mFlingRunnable.stop( false );
+			/*
+			int w = getRealWidth();
+			if (w > 0 && mWidth > 0) {
+				mOriginalDeltaX = (int) ( (float)value / mTicksCount * ( w * mWheelSizeFactor ) );
+			}
+			else {
+				w = this.mTicksCount;
+				mWidth = this.mTicksCount;
+				mOriginalDeltaX = value;
+			}*/
+			mTickValue = value;
+			invalidate();
+			
+			if( fireScrollEvent ) {
+				scrollCompleted();
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public void drawBackgroundEx(View bg) {
+		if (null != bg) {
+			LinearGradientDrawable d = new LinearGradientDrawable(Orientation.LEFT_RIGHT, mBgColors, mBgPositions) {
+				@Override
+				public void draw( Canvas canvas ) {
+					super.draw(canvas);
+					Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
+					p.setShader(mShader3);
+					canvas.drawPaint(p);
+				}
+			};
+			bg.setBackgroundDrawable(d);
+		}
 	}
 }

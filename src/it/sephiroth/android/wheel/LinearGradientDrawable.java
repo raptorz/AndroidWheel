@@ -1,4 +1,4 @@
-package it.sephiroth.android.wheel.graphics;
+package it.sephiroth.android.wheel;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;

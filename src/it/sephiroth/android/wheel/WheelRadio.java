@@ -1,4 +1,4 @@
-package it.sephiroth.android.wheel.view;
+package it.sephiroth.android.wheel;
 
 import it.sephiroth.android.wheel.R;
 import android.content.Context;
