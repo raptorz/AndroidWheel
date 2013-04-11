@@ -6,6 +6,7 @@
         <attr format="boolean" name="showIndicator" />
         <attr format="boolean" name="bidirection" />
         <attr format="boolean" name="flingEnabled" />
+        <attr format="integer" name="margin" />
     </declare-styleable>
     
     <declare-styleable name="WheelRadio">

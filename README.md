@@ -2,6 +2,18 @@
 
 Forked from sephiroth74/AndroidWheel
 
+###Attributes added
+
+There is wheel indicator, if **ShowIndicator** is True.
+
+The wheel will be able scrolling only one direction, if **Bidirection** is False.
+
+The wheel will be able fling over the range, if **FlingEnabled** is True.
+
+The ticks will fill full the wheel, if **Margin** is 0. otherwise, the tick margin is 1/**Margin**.
+
+###Original document
+
 To include the wheel widget in the current layout, you should add in the layout xml this lines:
 
             <it.sephiroth.android.wheel.Wheel
@@ -13,14 +25,6 @@ To include the wheel widget in the current layout, you should add in the layout 
                 sephiroth:ticks="28" />
 				
 Where **numRotations** is the max number of rotations the wheel can perform and **ticks** is the total number of ticks the wheel will display.
-
-###attributes added
-
-**ShowIndicator**
-
-**Bidirection**
-
-**FlingEnabled**
 
 In your activity you can add a **OnScrollListener** listener to the wheel widget, in this way:
 

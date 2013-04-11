@@ -30,6 +30,14 @@ import android.view.ViewConfiguration;
 
 public class Wheel extends View implements OnGestureListener, FlingRunnableView, VibrationWidget {
 
+	public int getmMargin() {
+		return mMargin;
+	}
+
+	public void setmMargin(int mMargin) {
+		this.mMargin = mMargin;
+	}
+
 	public boolean isFlingEnabled() {
 		return mFlingEnabled;
 	}
@@ -149,6 +157,7 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 	boolean mBidirection   = true;
 	boolean mFlingEnabled  = true;
 	int mTickValue = 0;
+	int mMargin = 10;
 
 	/**
 	 * Instantiates a new wheel.
@@ -359,7 +368,10 @@ public class Wheel extends View implements OnGestureListener, FlingRunnableView,
 		p.setColor( 0xFF888888 );
 
 		float h = (float) height;
-		float y = ( h + 10.0f ) / 10.0f;
+		float y = 0;
+		if (mMargin > 0) {
+			y = ( h + (float)mMargin) / (float)mMargin;
+		}
 		float y2 = y * 2.5f;
 
 		RectF rect = new RectF( 0, y, width, height - y2 );
